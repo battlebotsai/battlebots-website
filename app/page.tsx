@@ -1,0 +1,194 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Hero from '@/components/Hero';
+import PriceTicker from '@/components/PriceTicker';
+import AIBattleDisplay from '@/components/AIBattleDisplay';
+import AIFeed from '@/components/AIFeed';
+import Leaderboard from '@/components/Leaderboard';
+import Challenges from '@/components/Challenges';
+import BettingPreview from '@/components/BettingPreview';
+import TokenSection from '@/components/TokenSection';
+import StakingSection from '@/components/StakingSection';
+import HowItWorks from '@/components/HowItWorks';
+import Footer from '@/components/Footer';
+import { AIAgent, AIMessage, CryptoPrice, Challenge } from '@/lib/types';
+import { initializeAgents, simulateTrade, calculatePortfolioValue, updateAgentStats } from '@/lib/tradingSimulation';
+import { getMockPrices } from '@/lib/cryptoApi';
+
+export default function Home() {
+  const [agents, setAgents] = useState<AIAgent[]>([]);
+  const [cryptoPrices, setCryptoPrices] = useState<CryptoPrice[]>([]);
+  const [messages, setMessages] = useState<AIMessage[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [totalBattles, setTotalBattles] = useState(12847);
+  const [totalVolume, setTotalVolume] = useState(2458963);
+
+  // Initialize data
+  useEffect(() => {
+    const prices = getMockPrices();
+    setCryptoPrices(prices);
+    setAgents(initializeAgents(prices));
+
+    // Initialize challenges
+    const now = new Date();
+    setChallenges([
+      {
+        id: '1h',
+        name: 'Hourly',
+        duration: 3600,
+        prizePool: 5000,
+        currentLeader: 'ChatGPT',
+        endTime: new Date(now.getTime() + 3600000),
+      },
+      {
+        id: '4h',
+        name: '4-Hour',
+        duration: 14400,
+        prizePool: 25000,
+        currentLeader: 'Claude',
+        endTime: new Date(now.getTime() + 14400000),
+      },
+      {
+        id: '12h',
+        name: '12-Hour',
+        duration: 43200,
+        prizePool: 100000,
+        currentLeader: 'Gemini',
+        endTime: new Date(now.getTime() + 43200000),
+      },
+      {
+        id: '24h',
+        name: 'Daily',
+        duration: 86400,
+        prizePool: 500000,
+        currentLeader: 'Grok',
+        endTime: new Date(now.getTime() + 86400000),
+      },
+    ]);
+  }, []);
+
+  // Fetch real crypto prices
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const response = await fetch(
+          'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,tron,hyperliquid,xai,bittensor&order=market_cap_desc&sparkline=false'
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const formattedPrices = data.map((coin: any) => ({
+            id: coin.id,
+            symbol: coin.symbol.toUpperCase(),
+            name: coin.name,
+            current_price: coin.current_price,
+            price_change_percentage_24h: coin.price_change_percentage_24h,
+            market_cap: coin.market_cap,
+            image: coin.image,
+          }));
+          setCryptoPrices(formattedPrices);
+        }
+      } catch (error) {
+        console.error('Error fetching prices:', error);
+        // Keep using mock prices
+      }
+    };
+
+    fetchPrices();
+    const priceInterval = setInterval(fetchPrices, 60000); // Update every minute
+
+    return () => clearInterval(priceInterval);
+  }, []);
+
+  // Simulate price fluctuations for mock data
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCryptoPrices(prev => 
+        prev.map(crypto => ({
+          ...crypto,
+          current_price: crypto.current_price * (1 + (Math.random() - 0.5) * 0.002),
+          price_change_percentage_24h: crypto.price_change_percentage_24h + (Math.random() - 0.5) * 0.5,
+        }))
+      );
+    }, 10000); // Update every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Simulate AI trading
+  useEffect(() => {
+    if (agents.length === 0 || cryptoPrices.length === 0) return;
+
+    const interval = setInterval(() => {
+      setAgents(prevAgents => {
+        const randomAgentIndex = Math.floor(Math.random() * prevAgents.length);
+        const agentToTrade = prevAgents[randomAgentIndex];
+        
+        const { agent: updatedAgent, message, trade } = simulateTrade(agentToTrade, cryptoPrices);
+        
+        if (message) {
+          setMessages(prev => [...prev.slice(-50), message]); // Keep last 50 messages
+        }
+
+        if (trade) {
+          setTotalBattles(prev => prev + 1);
+          setTotalVolume(prev => prev + trade.amount * trade.price);
+        }
+
+        const totalValue = calculatePortfolioValue(updatedAgent, cryptoPrices);
+        const finalAgent = updateAgentStats(updatedAgent, totalValue);
+
+        return prevAgents.map((a, i) => 
+          i === randomAgentIndex ? finalAgent : a
+        );
+      });
+    }, 5000); // Trade every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [agents.length, cryptoPrices]);
+
+  // Update challenge leaders
+  useEffect(() => {
+    if (agents.length === 0) return;
+
+    const interval = setInterval(() => {
+      setChallenges(prev => prev.map(challenge => {
+        const randomAgent = agents[Math.floor(Math.random() * agents.length)];
+        return {
+          ...challenge,
+          currentLeader: randomAgent.name,
+        };
+      }));
+    }, 30000); // Update every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [agents]);
+
+  return (
+    <main className="min-h-screen">
+      <Hero 
+        totalBattles={totalBattles} 
+        activeAIs={6} 
+        totalVolume={totalVolume}
+      />
+      
+      {cryptoPrices.length > 0 && <PriceTicker prices={cryptoPrices} />}
+      
+      {agents.length > 0 && cryptoPrices.length > 0 && (
+        <>
+          <AIBattleDisplay agents={agents} cryptoPrices={cryptoPrices} />
+          <AIFeed messages={messages} />
+          <Leaderboard agents={agents} cryptoPrices={cryptoPrices} />
+          <Challenges challenges={challenges} />
+          <BettingPreview />
+          <HowItWorks />
+          <TokenSection />
+          <StakingSection />
+        </>
+      )}
+      
+      <Footer />
+    </main>
+  );
+}
