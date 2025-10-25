@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Twitter, Send, Github } from 'lucide-react';
+import { Twitter } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -26,20 +26,12 @@ export default function Footer() {
             </p>
             <div className="flex gap-4">
               <a
-                href="https://twitter.com/battlebots"
+                href="https://x.com/BattleBots_Sol"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/50 rounded-lg transition-all duration-300"
               >
                 <Twitter className="w-6 h-6 text-blue-400" />
-              </a>
-              <a
-                href="https://t.me/battlebots"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/50 rounded-lg transition-all duration-300"
-              >
-                <Send className="w-6 h-6 text-blue-400" />
               </a>
             </div>
           </div>

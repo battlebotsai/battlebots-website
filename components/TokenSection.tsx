@@ -76,9 +76,9 @@ export default function TokenSection() {
 
           <div className="bg-gradient-to-b from-gray-900/90 to-black/90 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-purple-500/50 transition-all duration-300">
             <Zap className="w-12 h-12 text-purple-400 mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">Trading Fees</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Ecosystem Growth</h3>
             <p className="text-gray-400">
-              All platform trading activity generates fees distributed to the ecosystem
+              Platform activity drives value and growth across the entire BattleBots ecosystem
             </p>
           </div>
         </div>

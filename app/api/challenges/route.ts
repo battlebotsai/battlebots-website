@@ -12,7 +12,7 @@ export async function GET() {
       const defaultChallenges = [
         {
           id: '1h',
-          name: 'Hourly',
+          name: '1 Hour Blitz',
           duration: 3600,
           prizePool: 5000,
           currentLeader: 'ChatGPT',
@@ -20,7 +20,7 @@ export async function GET() {
         },
         {
           id: '4h',
-          name: '4-Hour',
+          name: '4 Hour Sprint',
           duration: 14400,
           prizePool: 25000,
           currentLeader: 'Claude',
@@ -28,7 +28,7 @@ export async function GET() {
         },
         {
           id: '12h',
-          name: '12-Hour',
+          name: '12 Hour Marathon',
           duration: 43200,
           prizePool: 100000,
           currentLeader: 'Gemini',
@@ -36,7 +36,7 @@ export async function GET() {
         },
         {
           id: '24h',
-          name: 'Daily',
+          name: 'Daily Domination',
           duration: 86400,
           prizePool: 500000,
           currentLeader: 'Grok',
@@ -60,7 +60,7 @@ export async function GET() {
     return NextResponse.json([
       {
         id: '1h',
-        name: 'Hourly',
+        name: '1 Hour Blitz',
         duration: 3600,
         prizePool: 5000,
         currentLeader: 'ChatGPT',
@@ -68,7 +68,7 @@ export async function GET() {
       },
       {
         id: '4h',
-        name: '4-Hour',
+        name: '4 Hour Sprint',
         duration: 14400,
         prizePool: 25000,
         currentLeader: 'Claude',
@@ -76,7 +76,7 @@ export async function GET() {
       },
       {
         id: '12h',
-        name: '12-Hour',
+        name: '12 Hour Marathon',
         duration: 43200,
         prizePool: 100000,
         currentLeader: 'Gemini',
@@ -84,7 +84,7 @@ export async function GET() {
       },
       {
         id: '24h',
-        name: 'Daily',
+        name: 'Daily Domination',
         duration: 86400,
         prizePool: 500000,
         currentLeader: 'Grok',

@@ -17,7 +17,7 @@ export default function BettingPreview() {
   ];
 
   const currentTimeframe = timeframes.find(t => t.value === timeframe);
-  const potentialPayout = parseFloat(betAmount || '0') * (currentTimeframe?.multiplier || 1) * 0.97; // 3% fee
+  const potentialPayout = parseFloat(betAmount || '0') * (currentTimeframe?.multiplier || 1);
 
   return (
     <div className="py-16 px-4">
@@ -121,7 +121,7 @@ export default function BettingPreview() {
                     {potentialPayout.toFixed(2)} $BBOT
                   </div>
                   <div className="text-sm text-gray-400">
-                    {currentTimeframe?.multiplier}x multiplier • 3% fee
+                    {currentTimeframe?.multiplier}x multiplier
                   </div>
                 </div>
 
@@ -139,10 +139,6 @@ export default function BettingPreview() {
                     <div className="flex items-start gap-2">
                       <span className="text-purple-400 font-bold">3.</span>
                       <span>If your AI wins, earn multiplied rewards</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-purple-400 font-bold">4.</span>
-                      <span>3% fee: 1% dev, 2% distributed to stakers</span>
                     </div>
                   </div>
                 </div>

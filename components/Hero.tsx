@@ -16,7 +16,26 @@ export default function Hero({ totalBattles, activeAIs, totalVolume }: HeroProps
     <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black/80 z-0" />
       
-      <div className="relative z-10 text-center max-w-6xl mx-auto">
+      {/* Beta Testing Notice */}
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-4xl px-4">
+        <div className="bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-red-500/20 backdrop-blur-md border-2 border-yellow-500/50 rounded-lg p-4 shadow-2xl">
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 bg-yellow-500/30 rounded-full border-2 border-yellow-500">
+              <span className="text-yellow-300 font-bold text-xl">β</span>
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl md:text-2xl font-bold text-yellow-300 mb-1">
+                🚀 BETA TESTING IN PROGRESS
+              </h3>
+              <p className="text-sm md:text-base text-yellow-100">
+                Experience the future of AI trading battles. Some features are still in development.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="relative z-10 text-center max-w-6xl mx-auto mt-24">
         <div className="mb-8 flex justify-center">
           <Image 
             src="/assets/logos/main_logo.jpg" 

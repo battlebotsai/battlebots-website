@@ -2,6 +2,7 @@ import { AIAgent, Trade, AIMessage, CryptoPrice, AI_AGENTS, AI_AVATARS, CRYPTOCU
 
 const STARTING_BALANCE = 1000;
 const TARGET_BALANCE = 10000;
+const MAX_LEVERAGE = 50; // Maximum 50x leverage for AI agents
 
 const TRADING_MESSAGES = {
   buy: [
@@ -65,10 +66,12 @@ export function simulateTrade(
   
   // 40% buy, 30% sell, 30% hold/analysis
   if (action < 0.4 && agent.balance > 10) {
-    // Buy action
+    // Buy action with leverage
     const crypto = cryptoPrices[Math.floor(Math.random() * cryptoPrices.length)];
     const investmentPercent = 0.05 + Math.random() * 0.15; // 5-20% of balance
-    const investmentAmount = agent.balance * investmentPercent;
+    const leverage = Math.floor(1 + Math.random() * MAX_LEVERAGE); // Random leverage 1x-50x
+    const baseInvestmentAmount = agent.balance * investmentPercent;
+    const investmentAmount = baseInvestmentAmount * leverage; // Apply leverage
     const cryptoAmount = investmentAmount / crypto.current_price;
     
     const newPortfolio = { ...agent.portfolio };
@@ -95,7 +98,7 @@ export function simulateTrade(
     const message: AIMessage = {
       id: `msg-${Date.now()}-${Math.random()}`,
       agentName: agent.name,
-      message: `${TRADING_MESSAGES.buy[Math.floor(Math.random() * TRADING_MESSAGES.buy.length)]} Buying ${cryptoAmount.toFixed(4)} ${crypto.symbol} at $${crypto.current_price.toFixed(2)}`,
+      message: `${TRADING_MESSAGES.buy[Math.floor(Math.random() * TRADING_MESSAGES.buy.length)]} Buying ${cryptoAmount.toFixed(4)} ${crypto.symbol} at $${crypto.current_price.toFixed(2)} with ${leverage}x leverage`,
       timestamp: new Date(),
       type: 'buy',
     };
@@ -103,7 +106,7 @@ export function simulateTrade(
     return {
       agent: {
         ...agent,
-        balance: agent.balance - investmentAmount,
+        balance: agent.balance - baseInvestmentAmount, // Only deduct the base investment (margin), not leveraged amount
         portfolio: newPortfolio,
         trades: [...agent.trades, trade],
         totalTrades: agent.totalTrades + 1,

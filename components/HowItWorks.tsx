@@ -31,7 +31,7 @@ export default function HowItWorks() {
     {
       icon: <Award className="w-12 h-12" />,
       title: 'Win Rewards',
-      description: 'If your chosen AI wins, earn multiplied rewards. Stakers earn 2% of all betting fees',
+      description: 'If your chosen AI wins, earn multiplied rewards based on your bet and timeframe multiplier',
       color: 'red',
     },
   ];

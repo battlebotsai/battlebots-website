@@ -63,7 +63,7 @@ export default function Home() {
         setChallenges([
           {
             id: '1h',
-            name: 'Hourly',
+            name: '1 Hour Blitz',
             duration: 3600,
             prizePool: 5000,
             currentLeader: 'ChatGPT',
@@ -71,7 +71,7 @@ export default function Home() {
           },
           {
             id: '4h',
-            name: '4-Hour',
+            name: '4 Hour Sprint',
             duration: 14400,
             prizePool: 25000,
             currentLeader: 'Claude',
@@ -79,7 +79,7 @@ export default function Home() {
           },
           {
             id: '12h',
-            name: '12-Hour',
+            name: '12 Hour Marathon',
             duration: 43200,
             prizePool: 100000,
             currentLeader: 'Gemini',
@@ -87,7 +87,7 @@ export default function Home() {
           },
           {
             id: '24h',
-            name: 'Daily',
+            name: 'Daily Domination',
             duration: 86400,
             prizePool: 500000,
             currentLeader: 'Grok',
@@ -100,11 +100,48 @@ export default function Home() {
     fetchChallenges();
   }, []);
 
-  // Initialize data
+  // Initialize data and load from database
   useEffect(() => {
     const prices = getMockPrices();
     setCryptoPrices(prices);
-    setAgents(initializeAgents(prices));
+    
+    // Try to load bot stats from database
+    const loadBotStats = async () => {
+      try {
+        const response = await fetch('/api/bot-stats');
+        if (response.ok) {
+          const dbStats = await response.json();
+          
+          // If we have stats in DB, merge them with initialized agents
+          if (dbStats && dbStats.length > 0) {
+            const initializedAgents = initializeAgents(prices);
+            const mergedAgents = initializedAgents.map(agent => {
+              const dbStat = dbStats.find((s: any) => s.agent_name === agent.name);
+              if (dbStat) {
+                return {
+                  ...agent,
+                  totalTrades: dbStat.total_trades || 0,
+                  winningTrades: dbStat.winning_trades || 0,
+                  portfolioValue: parseFloat(dbStat.portfolio_value) || agent.portfolioValue,
+                  portfolio: dbStat.portfolio ? JSON.parse(dbStat.portfolio) : {},
+                };
+              }
+              return agent;
+            });
+            setAgents(mergedAgents);
+          } else {
+            setAgents(initializeAgents(prices));
+          }
+        } else {
+          setAgents(initializeAgents(prices));
+        }
+      } catch (error) {
+        console.error('Error loading bot stats:', error);
+        setAgents(initializeAgents(prices));
+      }
+    };
+    
+    loadBotStats();
   }, []);
 
   // Fetch real crypto prices
@@ -192,6 +229,17 @@ export default function Home() {
 
         const totalValue = calculatePortfolioValue(updatedAgent, cryptoPrices);
         const finalAgent = updateAgentStats(updatedAgent, totalValue);
+
+        // Persist bot stats to database
+        if (trade) {
+          fetch('/api/bot-stats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              agent: finalAgent
+            })
+          }).catch(err => console.error('Error updating bot stats:', err));
+        }
 
         return prevAgents.map((a, i) => 
           i === randomAgentIndex ? finalAgent : a
