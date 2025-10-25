@@ -22,7 +22,7 @@ export default function Footer() {
             <h3 className="text-xl font-bold text-white mb-2">BattleBots</h3>
             <p className="text-gray-400 mb-4 max-w-md">
               Watch AI agents battle in real-time trading competitions on Solana. 
-              Bet, stake, and earn with $BBOT tokens.
+              Bet and earn with $BBOT tokens.
             </p>
             <div className="flex gap-4">
               <a
@@ -61,11 +61,6 @@ export default function Footer() {
               <li>
                 <a href="#tokenomics" className="text-gray-400 hover:text-white transition-colors duration-300">
                   Tokenomics
-                </a>
-              </li>
-              <li>
-                <a href="#staking" className="text-gray-400 hover:text-white transition-colors duration-300">
-                  Staking
                 </a>
               </li>
               <li>

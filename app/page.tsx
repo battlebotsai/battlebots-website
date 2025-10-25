@@ -9,7 +9,6 @@ import Leaderboard from '@/components/Leaderboard';
 import Challenges from '@/components/Challenges';
 import BettingPreview from '@/components/BettingPreview';
 import TokenSection from '@/components/TokenSection';
-import StakingSection from '@/components/StakingSection';
 import HowItWorks from '@/components/HowItWorks';
 import Footer from '@/components/Footer';
 import { AIAgent, AIMessage, CryptoPrice, Challenge } from '@/lib/types';
@@ -24,48 +23,88 @@ export default function Home() {
   const [totalBattles, setTotalBattles] = useState(12847);
   const [totalVolume, setTotalVolume] = useState(2458963);
 
+  // Fetch stats from database
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setTotalBattles(data.totalBattles);
+          setTotalVolume(data.totalVolume);
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+    // Refresh stats every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch challenges from database
+  useEffect(() => {
+    const fetchChallenges = async () => {
+      try {
+        const response = await fetch('/api/challenges');
+        if (response.ok) {
+          const data = await response.json();
+          setChallenges(data.map((c: any) => ({
+            ...c,
+            endTime: new Date(c.endTime)
+          })));
+        }
+      } catch (error) {
+        console.error('Error fetching challenges:', error);
+        // Initialize with defaults on error
+        const now = new Date();
+        setChallenges([
+          {
+            id: '1h',
+            name: 'Hourly',
+            duration: 3600,
+            prizePool: 5000,
+            currentLeader: 'ChatGPT',
+            endTime: new Date(now.getTime() + 3600000),
+          },
+          {
+            id: '4h',
+            name: '4-Hour',
+            duration: 14400,
+            prizePool: 25000,
+            currentLeader: 'Claude',
+            endTime: new Date(now.getTime() + 14400000),
+          },
+          {
+            id: '12h',
+            name: '12-Hour',
+            duration: 43200,
+            prizePool: 100000,
+            currentLeader: 'Gemini',
+            endTime: new Date(now.getTime() + 43200000),
+          },
+          {
+            id: '24h',
+            name: 'Daily',
+            duration: 86400,
+            prizePool: 500000,
+            currentLeader: 'Grok',
+            endTime: new Date(now.getTime() + 86400000),
+          },
+        ]);
+      }
+    };
+
+    fetchChallenges();
+  }, []);
+
   // Initialize data
   useEffect(() => {
     const prices = getMockPrices();
     setCryptoPrices(prices);
     setAgents(initializeAgents(prices));
-
-    // Initialize challenges
-    const now = new Date();
-    setChallenges([
-      {
-        id: '1h',
-        name: 'Hourly',
-        duration: 3600,
-        prizePool: 5000,
-        currentLeader: 'ChatGPT',
-        endTime: new Date(now.getTime() + 3600000),
-      },
-      {
-        id: '4h',
-        name: '4-Hour',
-        duration: 14400,
-        prizePool: 25000,
-        currentLeader: 'Claude',
-        endTime: new Date(now.getTime() + 14400000),
-      },
-      {
-        id: '12h',
-        name: '12-Hour',
-        duration: 43200,
-        prizePool: 100000,
-        currentLeader: 'Gemini',
-        endTime: new Date(now.getTime() + 43200000),
-      },
-      {
-        id: '24h',
-        name: 'Daily',
-        duration: 86400,
-        prizePool: 500000,
-        currentLeader: 'Grok',
-        endTime: new Date(now.getTime() + 86400000),
-      },
-    ]);
   }, []);
 
   // Fetch real crypto prices
@@ -116,11 +155,11 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Simulate AI trading
+  // Simulate AI trading and update database
   useEffect(() => {
     if (agents.length === 0 || cryptoPrices.length === 0) return;
 
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       setAgents(prevAgents => {
         const randomAgentIndex = Math.floor(Math.random() * prevAgents.length);
         const agentToTrade = prevAgents[randomAgentIndex];
@@ -132,8 +171,23 @@ export default function Home() {
         }
 
         if (trade) {
+          // Update database with new trade
+          const tradeValue = trade.amount * trade.price;
+          fetch('/api/stats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'battle' })
+          }).catch(err => console.error('Error updating battle count:', err));
+
+          fetch('/api/stats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'volume', amount: tradeValue })
+          }).catch(err => console.error('Error updating volume:', err));
+
+          // Update local state immediately for responsiveness
           setTotalBattles(prev => prev + 1);
-          setTotalVolume(prev => prev + trade.amount * trade.price);
+          setTotalVolume(prev => prev + tradeValue);
         }
 
         const totalValue = calculatePortfolioValue(updatedAgent, cryptoPrices);
@@ -152,9 +206,20 @@ export default function Home() {
   useEffect(() => {
     if (agents.length === 0) return;
 
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       setChallenges(prev => prev.map(challenge => {
         const randomAgent = agents[Math.floor(Math.random() * agents.length)];
+        
+        // Update database
+        fetch('/api/challenges', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            challengeId: challenge.id, 
+            leaderName: randomAgent.name 
+          })
+        }).catch(err => console.error('Error updating challenge leader:', err));
+
         return {
           ...challenge,
           currentLeader: randomAgent.name,
@@ -184,7 +249,6 @@ export default function Home() {
           <BettingPreview />
           <HowItWorks />
           <TokenSection />
-          <StakingSection />
         </>
       )}
       
