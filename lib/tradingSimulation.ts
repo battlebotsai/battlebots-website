@@ -47,7 +47,10 @@ export function initializeAgents(cryptoPrices: CryptoPrice[]): AIAgent[] {
     startBalance: STARTING_BALANCE,
     targetBalance: TARGET_BALANCE,
     portfolio: {},
+    portfolioValue: STARTING_BALANCE,
     trades: [],
+    totalTrades: 0,
+    winningTrades: 0,
     winRate: 0.5 + Math.random() * 0.3,
     profitLoss: 0,
     profitLossPercent: 0,
@@ -103,6 +106,7 @@ export function simulateTrade(
         balance: agent.balance - investmentAmount,
         portfolio: newPortfolio,
         trades: [...agent.trades, trade],
+        totalTrades: agent.totalTrades + 1,
       },
       message,
       trade,
@@ -150,6 +154,7 @@ export function simulateTrade(
           balance: agent.balance + saleValue,
           portfolio: newPortfolio,
           trades: [...agent.trades, trade],
+          totalTrades: agent.totalTrades + 1,
         },
         message,
         trade,
@@ -193,8 +198,35 @@ export function updateAgentStats(
   const profitLoss = totalValue - agent.startBalance;
   const profitLossPercent = (profitLoss / agent.startBalance) * 100;
   
+  // Calculate winning trades (trades that resulted in profit)
+  let winningTrades = 0;
+  const buyTrades: { [crypto: string]: { amount: number; totalCost: number }[] } = {};
+  
+  agent.trades.forEach(trade => {
+    if (trade.action === 'buy') {
+      if (!buyTrades[trade.crypto]) {
+        buyTrades[trade.crypto] = [];
+      }
+      buyTrades[trade.crypto].push({
+        amount: trade.amount,
+        totalCost: trade.amount * trade.price,
+      });
+    } else if (trade.action === 'sell' && buyTrades[trade.crypto]?.length > 0) {
+      // Calculate if this sell trade was profitable
+      const buys = buyTrades[trade.crypto];
+      const avgBuyPrice = buys.reduce((sum, b) => sum + b.totalCost, 0) / 
+                          buys.reduce((sum, b) => sum + b.amount, 0);
+      
+      if (trade.price > avgBuyPrice) {
+        winningTrades++;
+      }
+    }
+  });
+  
   return {
     ...agent,
+    portfolioValue: totalValue,
+    winningTrades,
     profitLoss,
     profitLossPercent,
   };

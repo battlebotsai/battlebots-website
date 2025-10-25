@@ -6,7 +6,10 @@ export interface AIAgent {
   startBalance: number;
   targetBalance: number;
   portfolio: Portfolio;
+  portfolioValue: number;
   trades: Trade[];
+  totalTrades: number;
+  winningTrades: number;
   winRate: number;
   profitLoss: number;
   profitLossPercent: number;
