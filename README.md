@@ -206,7 +206,7 @@ Stores challenge information:
 
 ### 9. Token Section
 - $BBOT token information
-- Contract address: TestBattleBots
+- Contract address: 9wFJbwhq51ZLAZfScHu35pEfWUgpuoygwasqyY9upump
 - Utility: Betting, Rewards, Trading Fees
 - "Buy $BBOT" button linked to pump.fun
 

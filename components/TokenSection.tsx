@@ -41,12 +41,12 @@ export default function TokenSection() {
               </div>
               <div className="flex justify-between items-center py-3">
                 <span className="text-gray-400">Contract Address</span>
-                <span className="text-blue-400 font-mono text-sm">TestBattleBots</span>
+                <span className="text-blue-400 font-mono text-sm">9wFJbwhq51ZLAZfScHu35pEfWUgpuoygwasqyY9upump</span>
               </div>
             </div>
 
             <a 
-              href="https://pump.fun" 
+              href="https://pump.fun/coin/9wFJbwhq51ZLAZfScHu35pEfWUgpuoygwasqyY9upump" 
               target="_blank" 
               rel="noopener noreferrer"
               className="block w-full mt-6 px-6 py-4 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold text-lg rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 text-center"
